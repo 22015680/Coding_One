@@ -1,0 +1,234 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            margin: 0px;
+            background-color: #000000;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="output">
+    </div>
+    <script type="module">
+
+        import { OrbitControls } from "https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/OrbitControls.js";
+        import Stats from 'https://cdn.skypack.dev/three@0.132.2/examples/jsm/libs/stats.module.js';
+        import * as THREE from 'https://cdn.skypack.dev/three@0.132.2';
+        import { Water } from "https://cdn.skypack.dev/three@0.132.2/examples/jsm/objects/Water";
+
+
+
+        function init() {
+            var scene = new THREE.Scene();
+
+            var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 0, 50);
+            camera.lookAt(scene.position);
+            var renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            const geometry = new THREE.BoxBufferGeometry(100, 100, 100);
+            window.addEventListener("resize", () => {
+                camera.aspect = window.innerWidth / window.innerHeight
+                camera.updateProjectionMatrix()
+                renderer.setSize(window.innerWidth, window.innerHeight)
+            })
+            var myTextureLoader = new THREE.TextureLoader();
+
+            let texture1 = myTextureLoader.load('posx.jpg');
+            let cube_left = new THREE.MeshBasicMaterial({ map: texture1, side: THREE.DoubleSide });
+            let texture2 = myTextureLoader.load('negx.jpg');
+            let cube_right = new THREE.MeshBasicMaterial({ map: texture2, side: THREE.DoubleSide });
+            let texture3 = myTextureLoader.load('posy.jpg');
+            let cube_top = new THREE.MeshBasicMaterial({ map: texture3, side: THREE.DoubleSide });
+            let texture4 = myTextureLoader.load('negy.jpg');
+            let cube_bottom = new THREE.MeshBasicMaterial({ map: texture4, side: THREE.DoubleSide });
+            let texture5 = myTextureLoader.load('posz.jpg');
+            let cube_front = new THREE.MeshBasicMaterial({ map: texture5, side: THREE.DoubleSide });
+            let texture6 = myTextureLoader.load('negz.jpg')
+            let cube_back = new THREE.MeshBasicMaterial({ map: texture6, side: THREE.DoubleSide });
+            const cube = new THREE.Mesh(geometry, [cube_left, cube_right, cube_top, cube_bottom, cube_front, cube_back]);
+            scene.add(cube);
+
+            const light = new THREE.AmbientLight(0x404040);
+            scene.add(light);
+            const cubeTextureLoader = new THREE.CubeTextureLoader()
+            const envMapTexture = cubeTextureLoader.load([
+                'posx.jpg',
+                'negx.jpg',
+                'posy.jpg',
+                'negy.jpg',
+                'posz.jpg',
+                'negz.jpg',
+            ]);
+
+            const shpereGeometry = new THREE.SphereBufferGeometry(5, 20, 20);
+
+            const material = new THREE.MeshStandardMaterial({
+                metalness: 0.7,
+                roughness: 0.1,
+                envMap: envMapTexture,
+            });
+            const sphere2 = new THREE.Mesh(shpereGeometry, material);
+
+            scene.add(sphere2);
+            const torusKnotGeometry = new THREE.TorusKnotGeometry(7, 1, 256, 16);
+            const torusKnotMaterial = new THREE.MeshNormalMaterial();
+            const torusKnot = new THREE.Mesh(torusKnotGeometry, torusKnotMaterial);
+            torusKnot.scale.set(2, 2, 2);
+            scene.add(torusKnot);
+
+
+            function animate() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+
+                sphere2.rotation.x += 0.005;
+                sphere2.rotation.y += 0.005;
+                torusKnot.rotation.x += 0.005;
+                torusKnot.rotation.y += 0.005;
+            };
+
+            animate();
+
+
+            document.getElementById("output").appendChild(renderer.domElement);
+
+
+            let waterGeometry = new THREE.PlaneGeometry(1000, 1000);
+
+            let water = new Water(
+                waterGeometry, {
+                textureWidth: 512,
+                textureHeight: 512,
+                waterNormals: new THREE.TextureLoader().load('waternormals.jpg', function (texture) {
+                    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                }),
+                alpha: 0.5,
+                waterColor: 0xeeeff,
+                distortionScale: 3.7,
+                flowDirection: new THREE.Vector2(1, 1),
+            }
+            );
+
+            water.rotation.x = -Math.PI / 2.5;
+            water.position.z = -50;
+            scene.add(water);
+            const listener = new THREE.AudioListener();
+            camera.add(listener);
+
+
+            const sound = new THREE.Audio(listener);
+
+            const audioLoader = new THREE.AudioLoader();
+            audioLoader.load('bird.wav', function (buffer) {
+                sound.setBuffer(buffer);
+                sound.setLoop(true);
+                sound.setVolume(0.5);
+                sound.play();
+            });
+            function render() {
+                requestAnimationFrame(render);
+                renderer.render(scene, camera);
+            }
+
+            document.addEventListener('mousedown', onMouseDown);
+            document.addEventListener('mouseup', onMouseUp);
+            document.addEventListener('wheel', onMouseWheel);
+            document.oncontextmenu = function (event) {
+                event.preventDefault();
+            };
+            render();
+            var liftMouseDown, rightMouseDown;
+            var selectObj, lastPosition;
+            var lastIntersection, nowIntersection;
+            var mouseX, mouseY;
+
+            function onMouseDown(event) {
+                var rayCaster = getRay(event);
+                var intersects = rayCaster.intersectObjects([sphere2, torusKnot]);
+
+                if (event.button === 0 && intersects[0]) {
+                    selectObj = intersects[0].object;
+                    liftMouseDown = true;
+                    lastPosition = selectObj.position;
+                    lastIntersection = getIntersection(event);
+                    document.addEventListener('mousemove', onMouseMove);
+                }
+
+                if (event.button === 2) {
+                    mouseX = event.clientX;
+                    mouseY = event.clientY;
+                    rightMouseDown = true;
+                    document.addEventListener('mousemove', onMouseMove);
+                }
+            }
+
+            function onMouseUp(event) {
+                liftMouseDown = false;
+                rightMouseDown = false;
+                document.removeEventListener('mousemove', onMouseMove);
+            }
+
+            function onMouseMove(event) {
+
+                if (liftMouseDown) {
+                    nowIntersection = getIntersection(event);
+                    var offset = new THREE.Vector3();
+                    selectObj.position.copy(offset.subVectors(nowIntersection, lastIntersection).add(lastPosition));
+                    lastIntersection = nowIntersection;
+                    lastPosition = offset;
+                }
+                if (rightMouseDown) {
+                    var deltaX = event.clientX - mouseX;
+                    mouseX = event.clientX;
+                    var deltaY = event.clientY - mouseY;
+                    mouseY = event.clientY;
+                    rotation(deltaX, deltaY);
+                }
+            }
+
+            function rotation(x, y) {
+                water.rotation.y += x / 100;
+                water.rotation.x += y / 100;
+                cube.rotation.y += x / 100;
+                cube.rotation.x += y / 100;
+            }
+
+            function onMouseWheel(event) {
+                if (event.wheelDelta > 0) {
+                    sphere2.scale.copy(sphere2.scale.add(new THREE.Vector3(0.1, 0.1, 0.1)))
+                    torusKnot.scale.copy(sphere2.scale.add(new THREE.Vector3(0.1, 0.1, 0.1)))
+                } else {
+                    sphere2.scale.copy(sphere2.scale.sub(new THREE.Vector3(0.1, 0.1, 0.1)))
+                    torusKnot.scale.copy(sphere2.scale.sub(new THREE.Vector3(0.1, 0.1, 0.1)))
+                }
+            }
+
+            function getRay(event) {
+                event.preventDefault();
+                var mouse = new THREE.Vector2();
+                var rayCaster = new THREE.Raycaster();
+                var rect = renderer.domElement.getBoundingClientRect();
+                mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                rayCaster.setFromCamera(mouse, camera);
+                return rayCaster;
+            }
+
+            function getIntersection(event) {
+                var plane = new THREE.Plane();
+                plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(plane.normal), new THREE.Vector3(0, 0, 0));
+                var rayCaster = getRay(event);
+                var worldPoint = new THREE.Vector3();
+                rayCaster.ray.intersectPlane(plane, worldPoint);
+                return worldPoint;
+
+            }
+        }
+
+        init();
