@@ -29,6 +29,6 @@ amazing and inspired my curiosity to continue exploring afterwards.
 
 <div align="right">
 Github: https://github.com/22015680/Coding_One.git
-Mimic: https://mimicproject.com/code/adbf6a2e-ad41-e405-f964-c944ecbf0825
-Video Description: https://www.youtube.com/watch?v=F39M8Ow1UAI
+  Mimic: https://mimicproject.com/code/adbf6a2e-ad41-e405-f964-c944ecbf0825
+  Video Description: https://www.youtube.com/watch?v=F39M8Ow1UAI
 </div>
