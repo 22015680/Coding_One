@@ -1,7 +1,6 @@
-I have learnt a lot this term, starting with one dimensional sound, moving on to
-two dimensional graphics and then to three dimensional space. I am particularly
+I have learnt a lot this term, starting with one dimensional sound, moving on to two dimensional graphics and then to three dimensional space. I am particularly
 interested in 3D and realise the power of 3D engines, so I have chosen to use the
-three.js 3d library to create my final project. I started the project by creating a scene based on the three. js official
+three.js 3d library to create my final project. <br>I started the project by creating a scene based on the three. js official
 documentation, which included a Scene, a Perspective Camera and a renderer. To
 build a 3D world I need a skybox, so I created a cube to act as a mapping container
 and applied textures to six faces respectively. I also added an ambient light to the
@@ -24,7 +23,7 @@ interactivity! Hence, I created three mouse events to enable interaction with th
 skybox and my alien sculpture. Firstly, I listened to the right mouse button to control
 the rotation of the whole world and the water surface. Secondly, I listened to the
 wheel of the mouse to control the zooming in and out of the sphere and torusknot. Thirdly, I listened to my left mouse button. By clicking on the sphere or torusknot
-with the left mouse button and holding it, people can drag them anywhere in the park. These are my projects, which impressed upon me that the 3d engine is super
+with the left mouse button and holding it, people can drag them anywhere in the park. <br>These are my projects, which impressed upon me that the 3d engine is super
 amazing and inspired my curiosity to continue exploring afterwards. 
 
 <div align="right">
